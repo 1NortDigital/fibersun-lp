@@ -19,7 +19,7 @@ var COLS = [
   'timestamp','form_type','pagina','nome','telefone','cidade',
   'conta_mensal','conta_calc','segmento','ip',
   'utm_source','utm_medium','utm_campaign','utm_content','utm_term',
-  'gclid','fbclid','page_url','page_referer'
+  'gclid','fbclid','page_url','page_referer','landing_url'
 ];
 
 function doPost(e) {
@@ -31,9 +31,13 @@ function doPost(e) {
     var ss = SpreadsheetApp.openById(SHEET_ID);
     var sh = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
 
-    // garante cabeçalho
+    // garante cabeçalho; se já existir, adiciona colunas novas (ex: landing_url) no fim
     if (sh.getLastRow() === 0) {
       sh.appendRow(COLS.map(function(c){ return c; }));
+    } else {
+      var hdr = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+      var faltam = COLS.filter(function(c){ return hdr.indexOf(c) === -1; });
+      if (faltam.length) sh.getRange(1, hdr.length + 1, 1, faltam.length).setValues([faltam]);
     }
 
     var recebido = Utilities.formatDate(new Date(), 'America/Fortaleza', 'dd/MM/yyyy HH:mm:ss');
